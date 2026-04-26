@@ -1,0 +1,40 @@
+.card {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.header h3 {
+  margin: 0;
+  color: #202124;
+  font-size: 1.1rem;
+}
+
+.status-badge {
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.body {
+  color: #5f6368;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}

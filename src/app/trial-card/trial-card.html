@@ -1,0 +1,24 @@
+<div class="card">
+  <div class="header">
+    <h3>{{ trial.name }}</h3>
+    <span class="status-badge"
+          [style.background-color]="getStatusColor()">
+      {{ trial.status }}
+    </span>
+  </div>
+
+  <div class="body">
+    <div class="info-row">
+      <strong>Phase:</strong>
+      <span>{{ trial.phase }}</span>
+    </div>
+    <div class="info-row">
+      <strong>Patients:</strong>
+      <span>{{ trial.patientCount }}</span>
+    </div>
+    <div class="info-row">
+      <strong>Start Date:</strong>
+      <span>{{ trial.startDate | date:'mediumDate' }}</span>
+    </div>
+  </div>
+</div>
