@@ -1,11 +1,36 @@
 <div class="container">
-  <h1>🧪 Clinical Trials Dashboard</h1>
-  <p>Gestiona los estudios clínicos de tu organización</p>
-  <div class="trials-list">
-      @for (trial of trials; track trial.id) {
+  <header>
+    <h1>🧪 Clinical Trials Dashboard</h1>
+    <p>Gestiona los estudios clínicos de tu organización</p>
+  </header>
+
+  <!-- Estado: cargando -->
+  @if (loading()) {
+    <div class="state-message">
+      <p>⏳ Cargando estudios...</p>
+    </div>
+  }
+
+  <!-- Estado: error -->
+  @else if (error()) {
+    <div class="state-message error">
+      <p>❌ {{ error() }}</p>
+      <button (click)="retry()">Reintentar</button>
+    </div>
+  }
+
+  <!-- Estado: datos cargados -->
+  @else {
+    <div class="summary">
+      <strong>{{ trialCount() }}</strong> estudios encontrados
+    </div>
+
+    <div class="trials-list">
+      @for (trial of trials(); track trial.id) {
         <app-trial-card [trial]="trial" />
       } @empty {
-        <p>No hay estudios cargados</p>
+        <p class="state-message">No hay estudios cargados todavía.</p>
       }
-  </div>
+    </div>
+  }
 </div>
