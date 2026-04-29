@@ -50,6 +50,18 @@ export class TrialService {
     return this.http.get<ClinicalTrial>(`${this.apiUrl}/${id}`)
   }
 
+  createTrial(trial: Omit<ClinicalTrial, 'id'>) {
+    return this.http.post<ClinicalTrial>(this.apiUrl, trial);
+  }
+
+  updateTrial(id: number, trial: Omit<ClinicalTrial, 'id'>) {
+    return this.http.put<ClinicalTrial>(`${this.apiUrl}/${id}`, trial);
+  }
+  
+  deleteTrial(id: number) {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
   // Helper para parsear errores HTTP de forma amigable
   private getErrorMessage(err: any): string {
     if (err.status === 0) {

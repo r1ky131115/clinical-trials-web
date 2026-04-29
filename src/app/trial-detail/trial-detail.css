@@ -1,0 +1,33 @@
+.detail-container {
+    max-width: 700px;
+    margin: 1rem auto;
+    font-family: system-ui, sans-serif;
+}
+
+.back-link {
+    display: inline-block;
+    color: #1a73e8;
+    text-decoration: none;
+    margin-bottom: 1rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dadce0;
+}
+
+.detail-grid div {
+    padding: 8px 0;
+}
+
+.error-box {
+    background: #fef1f1;
+    color: #c5221f;
+    padding: 1rem;
+    border-radius: 8px;
+}

@@ -1,0 +1,29 @@
+<div class="list-header">
+    <h2>📋 Estudios clínicos</h2>
+    <a routerLink="/trials/new" class="btn-primary">+ Nuevo estudio</a>
+</div>
+
+@if (loading()) {
+    <div class="state-message">⏳ Cargando estudios...</div>
+}
+@else if (error()) {
+    <div class="state-message error">
+        <p>❌ {{ error() }}</p>
+        <button (click)="retry()">Reintentar</button>
+    </div>
+}
+@else {
+    <div class="summary">
+        <strong>{{ trialCount() }}</strong> estudios encontrados
+    </div>
+
+    <div class="trials-list">
+        @for (trial of trials(); track trial.id) {
+        <a [routerLink]="['/trials', trial.id]" class="trial-link">
+            <app-trial-card [trial]="trial" />
+        </a>
+    } @empty {
+        <p class="state-message">No hay estudios cargados todavía.</p>
+    }
+    </div>
+}

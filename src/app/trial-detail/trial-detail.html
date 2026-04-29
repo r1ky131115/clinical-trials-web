@@ -1,0 +1,22 @@
+<div class="detail-container">
+    <a routerLink="/trials" class="back-link">← Volver a la lista</a>
+
+    @if (loading()) {
+        <p>⏳ Cargando estudio...</p>
+    }
+    @else if (error()) {
+    <div class="error-box">
+        <p>❌ {{ error() }}</p>
+    </div>
+    }
+    @else if (trial(); as t) {
+    <h2>{{ t.name }}</h2>
+    <div class="detail-grid">
+        <div><strong>Phase:</strong> {{ t.phase }}</div>
+        <div><strong>Status:</strong> {{ t.status }}</div>
+        <div><strong>Patients:</strong> {{ t.patientCount }}</div>
+        <div><strong>Start date:</strong> {{ t.startDate | date:'fullDate' }}</div>
+        <div><strong>ID interno:</strong> {{ t.id }}</div>
+    </div>
+    }
+</div>
