@@ -3,10 +3,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/auth';
 import { environment } from '../../environments/environment.development';
 import { catchError, Observable, tap, throwError } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private http = inject(HttpClient);
+    private router = inject(Router);
 
     private readonly apiUrl = `${environment.apiUrl}/auth`;
 
@@ -62,6 +64,7 @@ export class AuthService {
     logout() {
         this._user.set(null);
         localStorage.removeItem('trial_auth_user');
+        return this.router.navigate(['/login']);
     }
 
     private getUserFromStorage(): User | null {
