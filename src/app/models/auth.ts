@@ -1,7 +1,9 @@
 export interface AuthResponse {
     token: string;
+    userId: string;
+    userName: string;
     email: string;
-    expiration: string;
+    expiresAt: string;
 }
 
 export interface LoginRequest {
@@ -9,9 +11,15 @@ export interface LoginRequest {
     password: string;
 }
 
+export interface RegisterRequest {
+    email: string;
+    password: string;
+    userName: string;
+}
+
 export interface User {
     id: string;
     email: string;
     token: string;
-    fullName: string;
+    userName: string;
 }

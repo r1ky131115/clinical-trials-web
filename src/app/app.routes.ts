@@ -3,10 +3,12 @@ import { Login } from './auth/login/login';
 import { TrialList } from './trial-list/trial-list';
 import { TrialForm } from './trial-form/trial-form';
 import { TrialDetail } from './trial-detail/trial-detail';
+import { Register } from './auth/register/register';
 
 export const routes: Routes = [
     { path : '', redirectTo: '/trials', pathMatch: 'full' },
     { path : 'login', component: Login },
+    { path : 'register', component: Register },
     { path : 'trials', component: TrialList },
     { path : 'trials/new', component: TrialForm },
     { path : 'trials/:id', component: TrialDetail },

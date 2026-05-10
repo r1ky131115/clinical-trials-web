@@ -42,7 +42,7 @@ export class Login {
     const c = this.control(name);
     if (c.errors?.['required']) return 'Este campo es obligatorio.';
     if (c.errors?.['email']) return 'Formato de email inválido.';
-    if (c.errors?.['minlength']) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (c.errors?.['minlength']) return 'La contraseña debe tener al menos 4 caracteres.';
     return '';
   }
 
@@ -57,13 +57,14 @@ export class Login {
 
     const data = this.loginForm.getRawValue();
 
-    try {
-      await this.authService.login(this.loginForm.value);
-      this.router.navigate(['/trials']);
-    } catch (error: any) {
-      this.submitError.set(error.message || 'Error desconocido');
-    } finally {
-      this.submitting.set(false);
-    }
+    this.authService.login(this.loginForm.value).subscribe({
+      next: () => {
+        this.router.navigate(['/trials']);
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        this.submitError.set(err.message || 'Error desconocido');
+      }
+    });
   }
 }

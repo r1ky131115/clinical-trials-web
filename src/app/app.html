@@ -2,9 +2,15 @@
   <header>
     <a routerLink="/trials" class="logo">🧪 Clinical Trials</a>
     <nav>
-      <a routerLink="/login">Iniciar sesión</a>
       <a routerLink="/trials">Lista</a>
       <a routerLink="/trials/new">Nuevo</a>
+      @if (authService.isAuthenticated()) {
+        <span>Hola, {{ authService.user()?.userName }}</span>
+        <button (click)="authService.logout()">Logout</button>
+      } @else {
+        <a routerLink="/login">Login</a>
+        <a routerLink="/register">Registro</a>
+      }
     </nav>
   </header>
 
