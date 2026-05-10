@@ -10,7 +10,7 @@ export class AuthService {
 
     private readonly apiUrl = `${environment.apiUrl}/auth`;
 
-    private _user = signal<User | null>(null);
+    private _user = signal<User | null>(this.getUserFromStorage());
     private _loading = signal<boolean>(false);
     private _error = signal<string | null>(null);
 
@@ -32,6 +32,7 @@ export class AuthService {
                     token: response.token,
                     userName: response.userName
                 });
+                localStorage.setItem('trial_auth_user', JSON.stringify(this._user()));
                 this._loading.set(false);
             }),
             catchError((err: HttpErrorResponse) => {
@@ -59,27 +60,42 @@ export class AuthService {
     };
 
     logout() {
-        this._loading.set(true);
-        this._error.set(null);
         this._user.set(null);
-        this._loading.set(false);
-    };
+        localStorage.removeItem('trial_auth_user');
+    }
+
+    private getUserFromStorage(): User | null {
+        const storedUser = localStorage.getItem('trial_auth_user');
+        return storedUser ? JSON.parse(storedUser) : null;
+    }
+
+    // Método helper para obtener el token rápidamente
+    getToken(): string | null {
+        return this._user()?.token || null;
+    }
 
     private parseError(err: HttpErrorResponse): string {
-        if (err.status === 400 && err.error?.errors) {
-            // Extraemos todos los mensajes de error en un solo array plano
-            const validationErrors = err.error.errors;
-            const messages = [];
+        const errorBody = err.error;
 
-            for (const key in validationErrors) {
-            if (validationErrors.hasOwnProperty(key)) {
-                messages.push(...validationErrors[key]);
-            }
-            }
-            // Devolvemos los errores unidos por un salto de línea o solo el primero
-            return messages.join(' '); 
+        // 1. Caso RFC 7807: Errores de validación (400 Bad Request)
+        // El estándar dice que los errores específicos de campo van en la propiedad 'errors'
+        if (err.status === 400 && errorBody?.errors) {
+            return Object.values(errorBody.errors)
+                .flat()
+                .join(' ');
         }
 
-        return err.error?.detail || err.message || 'Error inesperado';
+        // 2. Caso RFC 7807: Errores generales (401, 403, 404, 500)
+        // El estándar dice que la descripción humana va en la propiedad 'detail'
+        if (errorBody?.detail) {
+            return errorBody.detail;
+        }
+
+        // 3. Fallback: Si el backend envió algo que no sigue el RFC o hubo un error de red
+        if (typeof errorBody === 'string' && errorBody.length > 0) {
+            return errorBody;
+        }
+
+        return `Error ${err.status}: ${err.statusText || 'Intente más tarde'}`;
     }
 }
