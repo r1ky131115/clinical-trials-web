@@ -4,6 +4,7 @@ import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/aut
 import { environment } from '../../environments/environment.development';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { parseHttpError } from '../utils/error-parser';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -39,22 +40,24 @@ export class AuthService {
             }),
             catchError((err: HttpErrorResponse) => {
                 this._loading.set(false);
-                const message = this.parseError(err);
+                const message = parseHttpError(err);
                 this._error.set(message);
                 return throwError(() => new Error(message));
             })
         );
     }
 
-    register(userData: RegisterRequest) {
+    register(userData: RegisterRequest): Observable<void> {
         this._loading.set(true);
         this._error.set(null);
 
-        return this.http.post(`${this.apiUrl}/register`, userData).pipe(
-            tap(() => {} ),
+        return this.http.post<void>(`${this.apiUrl}/register`, userData).pipe(
+            tap(() => {
+                this._loading.set(false);
+            }),
             catchError((err: HttpErrorResponse) => {
                 this._loading.set(false);
-                const message = this.parseError(err);
+                const message = parseHttpError(err);
                 this._error.set(message);
                 return throwError(() => new Error(message));
             })
@@ -64,12 +67,7 @@ export class AuthService {
     logout() {
         this._user.set(null);
         localStorage.removeItem('trial_auth_user');
-        return this.router.navigate(['/login']);
-    }
-
-    private getUserFromStorage(): User | null {
-        const storedUser = localStorage.getItem('trial_auth_user');
-        return storedUser ? JSON.parse(storedUser) : null;
+        this.router.navigate(['/login']);
     }
 
     // Método helper para obtener el token rápidamente
@@ -77,28 +75,8 @@ export class AuthService {
         return this._user()?.token || null;
     }
 
-    private parseError(err: HttpErrorResponse): string {
-        const errorBody = err.error;
-
-        // 1. Caso RFC 7807: Errores de validación (400 Bad Request)
-        // El estándar dice que los errores específicos de campo van en la propiedad 'errors'
-        if (err.status === 400 && errorBody?.errors) {
-            return Object.values(errorBody.errors)
-                .flat()
-                .join(' ');
-        }
-
-        // 2. Caso RFC 7807: Errores generales (401, 403, 404, 500)
-        // El estándar dice que la descripción humana va en la propiedad 'detail'
-        if (errorBody?.detail) {
-            return errorBody.detail;
-        }
-
-        // 3. Fallback: Si el backend envió algo que no sigue el RFC o hubo un error de red
-        if (typeof errorBody === 'string' && errorBody.length > 0) {
-            return errorBody;
-        }
-
-        return `Error ${err.status}: ${err.statusText || 'Intente más tarde'}`;
+    private getUserFromStorage(): User | null {
+        const storedUser = localStorage.getItem('trial_auth_user');
+        return storedUser ? JSON.parse(storedUser) : null;
     }
 }

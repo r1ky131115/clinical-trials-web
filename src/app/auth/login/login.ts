@@ -57,8 +57,9 @@ export class Login {
 
     const data = this.loginForm.getRawValue();
 
-    this.authService.login(this.loginForm.value).subscribe({
+    this.authService.login(data).subscribe({
       next: () => {
+        this.submitting.set(false);
         this.router.navigate(['/trials']);
       },
       error: (err) => {

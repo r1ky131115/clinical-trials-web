@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -11,7 +11,6 @@ import { AuthService } from '../../services/auth';
 })
 export class Register {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private authService = inject(AuthService);
 
   submitting = signal(false);

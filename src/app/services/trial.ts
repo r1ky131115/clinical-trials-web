@@ -2,16 +2,14 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ClinicalTrial } from '../models/clinical-trial';
 import { environment } from '../../environments/environment.development';
+import { catchError, Observable, tap, throwError } from 'rxjs';
+import { parseHttpError } from '../utils/error-parser';
 
-@Injectable({
-  providedIn: 'root',
-})
-
+@Injectable({ providedIn: 'root'})
 export class TrialService {
   // Inyectamos HttpClient para realizar solicitudes HTTP
   private http = inject(HttpClient);
 
-  // URL base de la API.
   private readonly apiUrl = `${environment.apiUrl}/clinicaltrials`;
 
   // Estados internos con signals para manejar los datos y el estado de carga.
@@ -27,51 +25,85 @@ export class TrialService {
   // Computed: cantidad total
   trialCount = computed(() => this._trials().length);
 
-  // Método para cargar los trials desde la API.
   loadTrials(): void {
     this._loading.set(true);
     this._error.set(null);
 
-    this.http.get<ClinicalTrial[]>(this.apiUrl).subscribe({
-      next: (data) => {
+    this.http.get<ClinicalTrial[]>(this.apiUrl).pipe(
+      tap(data => {
         this._trials.set(data);
         this._loading.set(false);
-      },
-      error: (err) => {
-        console.error('Error al cargar los trials:', err);
-        this._error.set(this.getErrorMessage(err));
+      }),
+      catchError((err) => {
         this._loading.set(false);
-      },
-    });
+        const message = parseHttpError(err);
+        this._error.set(message);
+        return throwError(() => new Error(message));
+      })
+    ).subscribe();
   }
 
-  // Método para obtener un trial por ID.
-  getTrialById(id: number) {
-    return this.http.get<ClinicalTrial>(`${this.apiUrl}/${id}`)
+  getTrialById(id: number): Observable<ClinicalTrial> {    
+    this._loading.set(true);
+    this._error.set(null);
+
+    return this.http.get<ClinicalTrial>(`${this.apiUrl}/${id}`);
   }
 
-  createTrial(trial: Omit<ClinicalTrial, 'id'>) {
-    return this.http.post<ClinicalTrial>(this.apiUrl, trial);
+  createTrial(trial: Omit<ClinicalTrial, 'id'>): Observable<ClinicalTrial> {
+    this._loading.set(true);
+    this._error.set(null);
+
+    return this.http.post<ClinicalTrial>(this.apiUrl, trial).pipe(
+      tap((newTrial) => {
+        this._loading.set(false);
+        // Agregar el nuevo trial a la lista actual
+        this._trials.update(current => [...current, newTrial]);
+      }),
+      catchError((err) => {
+        this._loading.set(false);
+        const message = parseHttpError(err);
+        this._error.set(message);
+        return throwError(() => new Error(message));
+      })
+    );
   }
 
-  updateTrial(id: number, trial: Omit<ClinicalTrial, 'id'>) {
-    return this.http.put<ClinicalTrial>(`${this.apiUrl}/${id}`, trial);
+  updateTrial(id: number, trial: Omit<ClinicalTrial, 'id'>): Observable<ClinicalTrial> {
+    this._loading.set(true);
+    this._error.set(null);
+
+    return this.http.put<ClinicalTrial>(`${this.apiUrl}/${id}`, trial).pipe(
+      tap((updatedTrial) => {
+        this._loading.set(false);
+        // Actualizar el trial en la lista actual
+        this._trials.update(current => current.map(t => t.id === id ? updatedTrial : t));
+      }),
+      catchError((err) => {
+        this._loading.set(false);
+        const message = parseHttpError(err);
+        this._error.set(message);
+        return throwError(() => new Error(message));
+      })
+    );
   }
   
-  deleteTrial(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
+  deleteTrial(id: number): Observable<ClinicalTrial> {
+    this._loading.set(true);
+    this._error.set(null);
 
-  // Helper para parsear errores HTTP de forma amigable
-  private getErrorMessage(err: any): string {
-    if (err.status === 0) {
-      return 'No se pudo conectar al servidor. Verifica tu conexión.';
-    } else if (err.status >= 400 && err.status < 500) {
-      return 'Error en la solicitud. Por favor, verifica los datos ingresados.';
-    } else if (err.status >= 500) {
-      return 'Error del servidor. Intenta nuevamente más tarde.';
-    } else {
-          return err.error?.title || err.message || 'Error desconocido.';
-    }
-  };
+    return this.http.delete<ClinicalTrial>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        this._loading.set(false);
+        // Eliminar el trial de la lista actual
+        this._trials.update(current => current.filter(t => t.id !== id));
+      }),
+      catchError((err) => {
+        this._loading.set(false);
+        const message = parseHttpError(err);
+        this._error.set(message);
+        return throwError(() => new Error(message));
+      })
+    );
+  }
 }
