@@ -69,7 +69,7 @@ export class TrialService {
     );
   }
 
-  updateTrial(id: number, trial: Omit<ClinicalTrial, 'id'>): Observable<ClinicalTrial> {
+  updateTrial(id: number, trial: ClinicalTrial): Observable<ClinicalTrial> {
     this._loading.set(true);
     this._error.set(null);
 

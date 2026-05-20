@@ -24,6 +24,7 @@ export const routes: Routes = [
         children: [
             { path : '', component: TrialList },
             { path : 'new', component: TrialForm },
+            { path : ':id/edit', component: TrialForm },
             { path : ':id', component: TrialDetail }
         ]
     },

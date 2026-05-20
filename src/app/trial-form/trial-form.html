@@ -1,92 +1,107 @@
 <div class="form-container">
     <a routerLink="/trials" class="back-link">← Volver</a>
-    <h2>📝 Nuevo estudio clínico</h2>
-
-    <form [formGroup]="trialForm" (ngSubmit)="onSubmit()">
-        <!-- Name -->
-        <div class="field">
-        <label for="name">Nombre del estudio *</label>
-            <input
-                id="name"
-                type="text"
-                formControlName="name"
-                placeholder="Ej: GSK-ASTHMA-2026-A"
-                [class.invalid]="showError('name')"
-            />
-            @if (showError('name')) {
-                <small class="error">{{ errorMessage('name') }}</small>
-            }
+    <h2>
+        @if (isEditMode()) { 📝 Editar estudio clínico } 
+        @else { 📝 Nuevo estudio clínico }
+    </h2>
+    @if (initialLoading()) {
+        <div class="loading-spinner">
+            <p>⏳ Cargando datos del estudio...</p>
         </div>
-
-        <!-- Phase -->
-        <div class="field">
-        <label for="phase">Fase *</label>
-            <select id="phase" formControlName="phase" [class.invalid]="showError('phase')">
-                <option value="">-- Seleccionar --</option>
-                @for (p of phases; track p) {
-                    <option [value]="p">Fase {{ p }}</option>
+    } 
+    @else {
+        <form [formGroup]="trialForm" (ngSubmit)="onSubmit()">
+            <!-- Name -->
+            <div class="field">
+            <label for="name">Nombre del estudio *</label>
+                <input
+                    id="name"
+                    type="text"
+                    formControlName="name"
+                    placeholder="Ej: GSK-ASTHMA-2026-A"
+                    [class.invalid]="showError('name')"
+                />
+                @if (showError('name')) {
+                    <small class="error">{{ errorMessage('name') }}</small>
                 }
-            </select>
-            @if (showError('phase')) {
-                <small class="error">{{ errorMessage('phase') }}</small>
-            }
-        </div>
+            </div>
 
-        <!-- Patient count -->
-        <div class="field">
-        <label for="patientCount">Cantidad de pacientes *</label>
-            <input
-                id="patientCount"
-                type="number"
-                formControlName="patientCount"
-                min="1"
-                max="100000"
-                [class.invalid]="showError('patientCount')"
-            />
-            @if (showError('patientCount')) {
-                <small class="error">{{ errorMessage('patientCount') }}</small>
-            }
-        </div>
-
-        <!-- Status -->
-        <div class="field">
-        <label for="status">Status *</label>
-            <select id="status" formControlName="status" [class.invalid]="showError('status')">
-                @for (s of statuses; track s) {
-                    <option [value]="s">{{ s }}</option>
+            <!-- Phase -->
+            <div class="field">
+            <label for="phase">Fase *</label>
+                <select id="phase" formControlName="phase" [class.invalid]="showError('phase')">
+                    <option value="">-- Seleccionar --</option>
+                    @for (p of phases; track p) {
+                        <option [value]="p">Fase {{ p }}</option>
+                    }
+                </select>
+                @if (showError('phase')) {
+                    <small class="error">{{ errorMessage('phase') }}</small>
                 }
-            </select>
-        </div>
+            </div>
 
-        <!-- Start date -->
-        <div class="field">
-        <label for="startDate">Fecha de inicio *</label>
-            <input
-                id="startDate"
-                type="date"
-                formControlName="startDate"
-                [class.invalid]="showError('startDate')"
-            />
-            @if (showError('startDate')) {
-                <small class="error">{{ errorMessage('startDate') }}</small>
+            <!-- Patient count -->
+            <div class="field">
+            <label for="patientCount">Cantidad de pacientes *</label>
+                <input
+                    id="patientCount"
+                    type="number"
+                    formControlName="patientCount"
+                    min="1"
+                    max="100000"
+                    [class.invalid]="showError('patientCount')"
+                />
+                @if (showError('patientCount')) {
+                    <small class="error">{{ errorMessage('patientCount') }}</small>
+                }
+            </div>
+
+            <!-- Status -->
+            <div class="field">
+            <label for="status">Status *</label>
+                <select id="status" formControlName="status" [class.invalid]="showError('status')">
+                    @for (s of statuses; track s) {
+                        <option [value]="s">{{ s }}</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Start date -->
+            <div class="field">
+            <label for="startDate">Fecha de inicio *</label>
+                <input
+                    id="startDate"
+                    type="date"
+                    formControlName="startDate"
+                    [class.invalid]="showError('startDate')"
+                />
+                @if (showError('startDate')) {
+                    <small class="error">{{ errorMessage('startDate') }}</small>
+                }
+            </div>
+
+            <!-- Error general -->
+            @if (submitError()) {
+                <div class="alert error">{{ submitError() }}</div>
             }
-        </div>
 
-        <!-- Error general -->
-        @if (submitError()) {
-            <div class="alert error">{{ submitError() }}</div>
-        }
-
-        <!-- Submit -->
-        <div class="actions">
-            <a routerLink="/trials" class="btn-secondary">Cancelar</a>
-            <button type="submit" [disabled]="submitting()" class="btn-primary">
-            @if (submitting()) {
-                ⏳ Guardando...
-            } @else {
-                Crear estudio
-            }
-            </button>
-        </div>
-    </form>
+            <!-- Submit -->
+            <div class="actions">
+                <a routerLink="/trials" class="btn-secondary">Cancelar</a>
+                <button type="submit" [disabled]="submitting()" class="btn-primary">
+                @if (submitting()) {
+                    ⏳ Guardando...
+                } 
+                @else {
+                    @if (isEditMode()) {
+                        Guardar cambios
+                    }
+                    @else {
+                        Crear estudio
+                    }
+                }
+                </button>
+            </div>
+        </form>
+    }
 </div>

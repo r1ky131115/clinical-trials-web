@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TrialService } from '../services/trial';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { parseHttpError } from '../utils/error-parser';
 
 @Component({
   selector: 'app-trial-form',
@@ -10,13 +11,18 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './trial-form.css',
 })
 export class TrialForm {
-  private fb = inject(FormBuilder);
+  private fb =   inject(FormBuilder);
   private trialService = inject(TrialService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // Estados del submit
   submitting = signal(false);
   submitError = signal<string | null>(null);
+  initialLoading = signal(false);
+  
+  isEditMode = signal(false);
+  trialId = signal<number | null>(null);
 
   // Formulario reactivo
   trialForm: FormGroup = this.fb.group({
@@ -61,6 +67,34 @@ export class TrialForm {
     return 'Valor inválido.';
   }
 
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id');
+
+    if (idParam) {
+      this.isEditMode.set(true);
+      const id = Number(idParam);
+      this.trialId.set(id);
+      this.initialLoading.set(true);
+
+      this.trialService.getTrialById(id).subscribe({
+        next: (trial) => {
+          this.trialForm.patchValue({
+            name: trial.name,
+            phase: trial.phase,
+            patientCount: trial.patientCount,
+            status: trial.status,
+            startDate: trial.startDate.split('T')[0] // Solo la parte de fecha
+          });
+          this.initialLoading.set(false);
+        },
+        error: (err) => {
+          this.submitError.set(parseHttpError(err));
+          this.initialLoading.set(false);
+        }
+      });
+    }
+  }
+
   onSubmit(): void {
     this.submitError.set(null);
 
@@ -71,24 +105,21 @@ export class TrialForm {
 
     this.submitting.set(true);
     const data = this.trialForm.getRawValue();
+    const currentId = this.trialId();
 
-    this.trialService.createTrial(data).subscribe({
-      next: (created) => {
+    const request$ = this.isEditMode() && currentId
+      ? this.trialService.updateTrial(currentId!, data) 
+      : this.trialService.createTrial(data);
+    
+    request$.subscribe({
+      next: () => {
         this.submitting.set(false);
-        // Navegar al detalle del recién creado
-        this.router.navigate(['/trials', created.id]);
+        this.router.navigate(['/trials']);
       },
       error: (err) => {
         this.submitting.set(false);
-        // Si la API devuelve ProblemDetails con errors, los mostramos
-        const errors = err.error?.errors;
-        if (errors) {
-          const msgs = Object.values(errors).flat().join(', ');
-          this.submitError.set(`Validación falló: ${msgs}`);
-        } else {
-          this.submitError.set('Error al crear el estudio. Probá de nuevo.');
-        }
+        this.submitError.set(parseHttpError(err));
       }
     });
-  }  
+  }
 }
