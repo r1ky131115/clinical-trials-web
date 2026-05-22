@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ClinicalTrial } from '../models/clinical-trial';
 import { environment } from '../../environments/environment.development';
 import { catchError, Observable, tap, throwError } from 'rxjs';
@@ -25,11 +25,12 @@ export class TrialService {
   // Computed: cantidad total
   trialCount = computed(() => this._trials().length);
 
-  loadTrials(): void {
-    this._loading.set(true);
-    this._error.set(null);
+  loadTrials(filters?: { phase?: string; status?: string }): void {
+    let params = new HttpParams();
+    if (filters?.phase) params = params.set('phase', filters.phase);
+    if (filters?.status) params = params.set('status', filters.status);
 
-    this.http.get<ClinicalTrial[]>(this.apiUrl).pipe(
+    this.http.get<ClinicalTrial[]>(this.apiUrl, { params }).pipe(
       tap(data => {
         this._trials.set(data);
         this._loading.set(false);

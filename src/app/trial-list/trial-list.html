@@ -3,6 +3,20 @@
     <a routerLink="/trials/new" class="btn-primary">+ Nuevo estudio</a>
 </div>
 
+<select #phaseSelect (change)="onFilterChange(phaseSelect.value, statusSelect.value)">
+    <option value="">Todas las Fases</option>
+    @for (phase of phases; track phase) {
+        <option [value]="phase">Fase {{ phase }}</option>
+    }
+</select>
+
+<select #statusSelect (change)="onFilterChange(phaseSelect.value, statusSelect.value)">
+    <option value="">Todos los Estados</option>
+    @for (status of statuses; track status) {
+        <option [value]="status"> {{ status }}</option>
+    }
+</select>
+
 @if (loading()) {
     <div class="state-message">⏳ Cargando estudios...</div>
 }

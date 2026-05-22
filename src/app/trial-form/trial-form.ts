@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validator
 import { TrialService } from '../services/trial';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { parseHttpError } from '../utils/error-parser';
+import { TRIAL_PHASES, TRIAL_STATUSES } from '../models/trial.types';
 
 @Component({
   selector: 'app-trial-form',
@@ -42,8 +43,8 @@ export class TrialForm {
   });
 
   // Listas para los selects
-  phases = ['I', 'II', 'III', 'IV'];
-  statuses = ['Recruiting', 'Active', 'Completed', 'Cancelled'];
+  phases = TRIAL_PHASES;
+  statuses = TRIAL_STATUSES;
 
   // Helper para acceder a los controles desde el template
   control(name: string): AbstractControl {
