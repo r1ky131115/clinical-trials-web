@@ -28,7 +28,7 @@
 }
 @else {
     <div class="summary">
-        <strong>{{ trialCount() }}</strong> estudios encontrados
+        <strong>{{ totalCount() }}</strong> estudios encontrados
     </div>
 
     <div class="trials-list">
@@ -40,4 +40,26 @@
         <p class="state-message">No hay estudios cargados todavía.</p>
     }
     </div>
+
+    @if (totalPages() > 1) {
+        <div class="pagination-controls">
+            <button 
+                class="btn-page"
+                [disabled]="currentPage() === 1 || loading()" 
+                (click)="changePage(currentPage() - 1)">
+                ⬅ Anterior
+            </button>
+            
+            <span class="page-info">
+                Página {{ currentPage() }} de {{ totalPages() }}
+            </span>
+            
+            <button 
+                class="btn-page"
+                [disabled]="currentPage() === totalPages() || loading()" 
+                (click)="changePage(currentPage() + 1)">
+                Siguiente ➡
+            </button>
+        </div>
+    }
 }

@@ -20,7 +20,10 @@ export class TrialList {
   loading = this.trialService.loading;
   error = this.trialService.error;
   trialCount = this.trialService.trialCount;
-  
+  totalCount = this.trialService.totalCount;
+  currentPage = this.trialService.currentPage;
+  totalPages = this.trialService.totalPages;
+
   phases = TRIAL_PHASES;
   statuses = TRIAL_STATUSES;
 
@@ -30,22 +33,30 @@ export class TrialList {
 
   ngOnInit(): void {
     // Cargamos los trials al iniciar el componente
-    this.fetchTrials()
+    this.fetchTrials(1)
   }
 
   // Se ejecuta cada vez que cambia algún <select>
   onFilterChange(phase: string, status: string) {
     this.currentPhase.set(phase);
     this.currentStatus.set(status);
-    this.fetchTrials();
+    this.fetchTrials(1);
+  }
+
+  changePage(newPage: number) {
+    if (newPage >= 1 && newPage <= this.totalPages()) {
+      this.fetchTrials(newPage);
+    }
   }
 
   // Método unificado para cargar con los filtros actuales
-  private fetchTrials() {
+  private fetchTrials(pageToLoad: number) {
     // Convertimos los strings vacíos ('') a undefined para que el servicio no los envíe
     const filters = {
       phase: this.currentPhase() || undefined,
-      status: this.currentStatus() || undefined
+      status: this.currentStatus() || undefined,
+      page: pageToLoad,      
+      pageSize: 5,
     };
     
     this.trialService.loadTrials(filters);
@@ -53,6 +64,6 @@ export class TrialList {
 
   // Método para reintentar si falla la carga
   retry() {
-    this.trialService.loadTrials();
+    this.fetchTrials(this.currentPage() || 1);
   }
 }
